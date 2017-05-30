@@ -33,6 +33,7 @@ from collections import OrderedDict
 import argparse
 import tempfile
 import datetime
+import traceback
 
 def usage():
   print __doc__
@@ -336,7 +337,11 @@ def main(parser):
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser()
-  main(parser) 
-  stdin.readline().rstrip("\n")  
+  try:
+    main(parser) 
+  except:
+    traceback.print_exc(file=sys.stdout)
+    print "Pressione qualquer tecla para continuar..."
+    stdin.readline().rstrip("\n")  
 
 
