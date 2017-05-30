@@ -72,19 +72,15 @@ class TopPanel(wx.Panel):
 	sizer = wx.BoxSizer(wx.HORIZONTAL)
 
 
-	for i in ('red', 'green', 'blue', 'cyan', 'magenta'):
-	    btn = wx.Button(self, -1, i)
-	    sizer.Add(btn, 1, wx.TOP|wx.BOTTOM, 15)
-	    btn.Bind(wx.EVT_BUTTON, self.OnButton)
+	btn = wx.Button(self, -1, 'Executar')
+	sizer.Add(btn, 1, wx.TOP|wx.BOTTOM, 15)
+	btn.Bind(wx.EVT_BUTTON, self.OnButton)
 	
 	self.SetSizer(sizer)
 	
 	
     def OnButton(self, event):
-	btn = event.GetEventObject()
-	label = btn.GetLabel()
-	self.colour = label
-	event.Skip()
+        event.Skip()
 
 ID_READ_ONLY = wx.NewId()
 
@@ -130,6 +126,23 @@ class MainFrame(wx.Frame):
 
 	 #Event Handler
 	 self.Bind(wx.EVT_MENU,self.OnMenu)  
+         self.Bind(wx.EVT_BUTTON, self.OnButton)
+
+    def OnButton(self, event):
+	btn = event.GetEventObject()
+        btn.Enabled=False
+        try:
+          ini,fim = self.nbk.edt.GetSelection()
+          if ini != fim: 
+            sav_sql=self.cyx.sql_query
+            new_sql=self.nbk.edt.GetSelectedText()
+            self.cyx.sql_query=new_sql
+          self.cyx.connect_db()
+          rows=cyx.execute_query()
+          for row in rows:
+            self.nbk.out.AppendText(row)
+        finally:
+          btn.Enabled=True
 	 
     def LoadFromFile(self, fname):
         self.cyx=CsvAnyware(fname)
@@ -142,7 +155,6 @@ class MainFrame(wx.Frame):
 
     def OnMenu(self, event):
 	""" Handle menu clicks """
-        print "Entrou"
 	evt_id = event.GetId()
                   
         editor = self.nbk.edt
@@ -161,7 +173,6 @@ class MainFrame(wx.Frame):
 	   dlg = wx.FileDialog(self,"Abrir arquivo",
 			       style=wx.FD_OPEN)
 	   if dlg.ShowModal() == wx.ID_OK:
-               print "Show modal"
 	       fname = dlg.GetPath()
 	       self.LoadFromFile(fname)
 	       self.PushStatusText(fname)
