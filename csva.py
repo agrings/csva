@@ -226,6 +226,29 @@ class CsvAnyware():
       rows.append(row) 
     return rows
     
+  def tabularize_it(self, rows):
+
+    max_sizes=[]
+    for column in self.columns:
+      max_sizes+=[len(column)]
+  
+    new_rows=[]
+    for row in rows:
+      (str_list,new_sizes)=self.format_row_as_a_list(row)
+      max_sizes=[ a if a> b else b for a,b in zip(max_sizes,new_sizes) ]
+      new_rows+=[str_list]
+  
+    format_str=""
+    for field,size in zip(new_rows[0],max_sizes):
+      alignment = "%" if isnumber(field) else "%-"
+      format_str += alignment+str(size)+"s|"
+
+    str_rows = [ format_str % tuple(self.columns) ]
+    for row in new_rows:
+      str_rows += [ format_str % tuple(row) ]
+    
+    return str_rows
+
 def edit_it(cyx):
   try:
     editor=os.environ['CYX_EDITOR']
@@ -259,7 +282,8 @@ def run_it(cyx, param_values, tabularize, temp_export):
     return
 
   if tabularize:
-    tabularize_it(cyx,rows)
+    for linha in cyx.tabularize_it(rows):
+      print linha
     return
 
   if temp_export:
@@ -282,26 +306,6 @@ def run_it(cyx, param_values, tabularize, temp_export):
     os.system(cyx.pos_exec)
 
 
-def tabularize_it(cyx, rows):
-
-  max_sizes=[]
-  for column in cyx.columns:
-    max_sizes+=[len(column)]
-  
-  new_rows=[]
-  for row in rows:
-    (str_list,new_sizes)=cyx.format_row_as_a_list(row)
-    max_sizes=[ a if a> b else b for a,b in zip(max_sizes,new_sizes) ]
-    new_rows+=[str_list]
-  
-  format_str=""
-  for field,size in zip(new_rows[0],max_sizes):
-    alignment = "%" if isnumber(field) else "%-"
-    format_str += alignment+str(size)+"s|"
-
-  print format_str % tuple(cyx.columns)
-  for row in new_rows:
-    print format_str % tuple(row)
 
 
 

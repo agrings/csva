@@ -55,8 +55,14 @@ class MyNotebook(wx.Notebook):
 	self.log = wx.TextCtrl(self,
 				    value="The log",
 				    style=wx.TE_MULTILINE)
+
+
+        font1 = wx.Font(10, wx.MODERN, wx.NORMAL, 
+                        wx.NORMAL, False, u'Andale Mono')
+
 	self.out = wx.TextCtrl(self,
 				  style=wx.TE_MULTILINE)
+        self.out.SetFont(font1)
 
 	# Setup
 	#self.AddPage(self.textctrl, "Text Editor")
@@ -132,15 +138,20 @@ class MainFrame(wx.Frame):
 	btn = event.GetEventObject()
         btn.Enabled=False
         try:
+          sav_sql=self.cyx.sql_query
+          new_sql=self.nbk.edt.GetText()
           ini,fim = self.nbk.edt.GetSelection()
           if ini != fim: 
-            sav_sql=self.cyx.sql_query
             new_sql=self.nbk.edt.GetSelectedText()
-            self.cyx.sql_query=new_sql
+
+          self.cyx.sql_query=new_sql
           self.cyx.connect_db()
-          rows=cyx.execute_query()
-          for row in rows:
-            self.nbk.out.AppendText(row)
+          rows=self.cyx.execute_query()
+          print rows
+          self.nbk.out.Clear()
+          for linha in self.cyx.tabularize_it(rows):
+          
+            self.nbk.out.AppendText(linha+"\n")
         finally:
           btn.Enabled=True
 	 

@@ -4,7 +4,7 @@ descricao: 'Aqui vai a descrição/instruções
   MySql OK
 
   '
-exportar: !!python/unicode 'testeOpenErp.csv'
+exportar: !!python/unicode 'teste.csv'
 exportar_nomes_campos: !!python/unicode '1'
 filename: teste.cyx
 param_names:
@@ -13,18 +13,9 @@ param_names:
 - tres
 pos_exec: !!python/unicode ''
 resumo: !!python/unicode 'Nova consulta 1'
-sql_query: "/*\n [um]\n [dois]\n [tres]\n*/\n    with LDM as(\n      select \n   \
-  \      mb.product_id,\n         mb.code as bom_code, \n         mb.name as bom_name,\n\
-  \         pp.id ing_id,\n         pp.default_code as ing_code,\n         pp.name_template\
-  \ as ing_name,\n         bl.product_qty as ing_qty,\n         pu.name as ing_uom,\n\
-  \         bl.type as ing_type\n      from mrp_bom mb\n           left join mrp_bom_line\
-  \ bl on bl.bom_id=mb.id\n           left join product_product pp on bl.product_id=pp.id\n\
-  \           left join product_uom pu on pu.id=bl.product_uom\n         \n    )\n\
-  \    select *\n    from LDM where product_id in (select pp.id from product_product\
-  \ pp\n                                left join product_template pt on pp.product_tmpl_id=pt.id\n\
-  \                                where default_code not in ('1110','1020') and not\
-  \ (default_code like 'GI%') and (sale_ok or coalesce(state,'')='draft')\n      \
-  \                         )\n"
-string_conexao_pyodbc: DSN=OdooNFe
-string_conexao_windows: !!python/unicode 'Provider=MSDASQL.1;Persist Security Info=False;User
-  ID=postgres;Data Source=OdooNFe;Initial Catalog=grings'
+separador_decimal: ','
+sql_query: 'select * from women
+
+  '
+string_conexao_pyodbc: DSN=exdb
+string_conexao_windows: ''
