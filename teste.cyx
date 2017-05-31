@@ -7,15 +7,12 @@ descricao: 'Aqui vai a descrição/instruções
 exportar: !!python/unicode 'teste.csv'
 exportar_nomes_campos: !!python/unicode '1'
 filename: teste.cyx
-param_names:
-- um
-- dois
-- tres
+param_names: []
 pos_exec: !!python/unicode ''
 resumo: !!python/unicode 'Nova consulta 1'
 separador_decimal: ','
-sql_query: 'select * from women
+sql_query: 'select * from employees
 
   '
-string_conexao_pyodbc: DSN=exdb
+string_conexao_pyodbc: DSN=chinook
 string_conexao_windows: ''
