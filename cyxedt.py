@@ -1,4 +1,5 @@
 import wx
+import wx.grid as gridlib
 import wx.stc as stc
 import keyword
 from csva import *
@@ -45,7 +46,29 @@ class CodeEditorBase(stc.StyledTextCtrl):
 			  "face:%(font)s" % faces)
 
 
+class BaseList(wx.ListCtrl):
 
+      def __init__(self, parent):
+
+          super(BaseList, self).__init__(parent,
+                                         style=wx.LC_REPORT)
+
+
+class OutputGrid(BaseList):
+    def __init__(self,parent):
+        super(OutputGrid,self).__init__(parent)
+    
+    def addHeader(self,header_list):
+        """ Add column headers """
+        i=0
+        for name in header_list:
+            self.InsertColumn(i,name)
+            i+=1
+            
+    def addRow(self, row_as_a_list ):
+        """ Adds a row to the grid """
+        item = self.Append(tuple(row_as_a_list))
+               
 class MyNotebook(wx.Notebook):
     def __init__(self, parent):
 	super(MyNotebook, self).__init__(parent)
@@ -63,12 +86,15 @@ class MyNotebook(wx.Notebook):
 	self.out = wx.TextCtrl(self,
 				  style=wx.TE_MULTILINE|wx.HSCROLL)
         self.out.SetFont(font1)
+       
+        self.out2 = OutputGrid(self)
 
 	# Setup
 	#self.AddPage(self.textctrl, "Text Editor")
 	self.AddPage(self.edt, "Text Editor")
 	self.AddPage(self.log, "Activity Log")
 	self.AddPage(self.out,"Data output")
+	self.AddPage(self.out2,"Data output 2")
 
 class TopPanel(wx.Panel):
     def __init__(self, parent):
@@ -147,10 +173,11 @@ class MainFrame(wx.Frame):
           self.cyx.sql_query=new_sql
           self.cyx.connect_db()
           rows=self.cyx.execute_query()
-          print rows
+          self.nbk.out2.addHeader(self.cyx.columns)
+          for row in rows:
+              self.nbk.out2.addRow(row)
           self.nbk.out.Clear()
           for linha in self.cyx.tabularize_it(rows):
-          
             self.nbk.out.AppendText(linha+"\n")
         finally:
           btn.Enabled=True
