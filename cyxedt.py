@@ -61,7 +61,7 @@ class MyNotebook(wx.Notebook):
                         wx.NORMAL, False, u'Andale Mono')
 
 	self.out = wx.TextCtrl(self,
-				  style=wx.TE_MULTILINE)
+				  style=wx.TE_MULTILINE|wx.HSCROLL)
         self.out.SetFont(font1)
 
 	# Setup
