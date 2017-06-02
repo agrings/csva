@@ -64,6 +64,24 @@ class OutputGrid(wx.ListCtrl):
         """ Adds a row to the grid """
         item = self.Append(tuple(row_as_a_list))
                
+class ConfigPanel(wx.Panel):
+    def __init__(self, parent, config_parameters):
+        wx.Panel.__init__(self, parent, -1)
+
+
+        sizer1 = wx.BoxSizer(wx.Vertical)
+        self.config_values={}
+        sizers = []
+        for parameter in config_parameters:
+          label = wx.StaticText(self.panel, wx.ID_ANY, parameter)
+          config_values[parameter] = wx.TextCtrl(self.panel, wx.ID_ANY, '')
+          sizer2= wx.BoxSizer(wx.HORIZONTAL)
+          sizer2.Add(label)
+          sizer2.Add(config_values[parameter])
+          sizer.Add(sizer2)
+
+        self.SetSizer(sizer)
+
 class MyNotebook(wx.Notebook):
     def __init__(self, parent):
 	super(MyNotebook, self).__init__(parent)
@@ -73,7 +91,7 @@ class MyNotebook(wx.Notebook):
 	self.log = wx.TextCtrl(self,
 				    value="The log",
 				    style=wx.TE_MULTILINE)
-
+        self.cfg = ConfigPanel(self,["um","dois","tres"])
 
        
         self.out = OutputGrid(self)
@@ -82,6 +100,7 @@ class MyNotebook(wx.Notebook):
 	#self.AddPage(self.textctrl, "Text Editor")
 	self.AddPage(self.edt, "Text Editor")
 	self.AddPage(self.log, "Activity Log")
+	self.AddPage(self.cfg, "Configuration")
 	self.AddPage(self.out,"Data output")
 
 class TopPanel(wx.Panel):
