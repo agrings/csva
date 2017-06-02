@@ -64,7 +64,7 @@ def isfloat(s):
     except ValueError:
       return False
 
-class CsvAnyware():
+class CsvAnywhere():
   #class variables
   resumo = ""
   exportar = ""
@@ -119,6 +119,20 @@ class CsvAnyware():
 
   
   def __init__(self,filename):
+
+    if not filename:
+      self.resumo = ''
+      self.exportar = ''
+      self.pos_exec = ''
+      self.exportar_nomes_campos = 'True'
+      self.caracter_separacao = ';'
+      self.descricao = ''
+      self.sql_query = ''
+      self.param_names = []
+      self.string_conexao_windows = ''
+      self.string_conexao_pyodbc=''
+      self.separador_decimal=','
+      return
 
     just_filename, file_extension = os.path.splitext(filename)
     self.filename=just_filename+".cyx"
@@ -326,7 +340,7 @@ def main(parser):
                      )
   parser.add_argument("-p","--parameters",nargs='+',help="Fornece parametros na linha de comando (caso contrario o programa espera a entrada)")
   args = parser.parse_args()
-  cyx=CsvAnyware(args.filename)
+  cyx=CsvAnywhere(args.filename)
   if args.edit:
     edit_it(cyx)
   elif args.run:

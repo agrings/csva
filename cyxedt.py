@@ -46,17 +46,12 @@ class CodeEditorBase(stc.StyledTextCtrl):
 			  "face:%(font)s" % faces)
 
 
-class BaseList(wx.ListCtrl):
-
-      def __init__(self, parent):
-
-          super(BaseList, self).__init__(parent,
-                                         style=wx.LC_REPORT)
 
 
-class OutputGrid(BaseList):
+class OutputGrid(wx.ListCtrl):
     def __init__(self,parent):
-        super(OutputGrid,self).__init__(parent)
+        super(OutputGrid,self).__init__(parent,
+                                         style=wx.LC_REPORT)
     
     def addHeader(self,header_list):
         """ Add column headers """
@@ -80,21 +75,14 @@ class MyNotebook(wx.Notebook):
 				    style=wx.TE_MULTILINE)
 
 
-        font1 = wx.Font(10, wx.MODERN, wx.NORMAL, 
-                        wx.NORMAL, False, u'Andale Mono')
-
-	self.out = wx.TextCtrl(self,
-				  style=wx.TE_MULTILINE|wx.HSCROLL)
-        self.out.SetFont(font1)
        
-        self.out2 = OutputGrid(self)
+        self.out = OutputGrid(self)
 
 	# Setup
 	#self.AddPage(self.textctrl, "Text Editor")
 	self.AddPage(self.edt, "Text Editor")
 	self.AddPage(self.log, "Activity Log")
 	self.AddPage(self.out,"Data output")
-	self.AddPage(self.out2,"Data output 2")
 
 class TopPanel(wx.Panel):
     def __init__(self, parent):
@@ -103,10 +91,12 @@ class TopPanel(wx.Panel):
 	
 	sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-
-	btn = wx.Button(self, -1, 'Executar')
-	sizer.Add(btn, 1, wx.TOP|wx.BOTTOM, 15)
-	btn.Bind(wx.EVT_BUTTON, self.OnButton)
+        bmp = wx.Bitmap("execute.bmp")
+        button = wx.Button(self, label= "Executar")
+        button.SetBitmap(bmp)
+        self.Refresh()
+	sizer.Add(button)
+	button.Bind(wx.EVT_BUTTON, self.OnButton)
 	
 	self.SetSizer(sizer)
 	
@@ -124,6 +114,7 @@ class MainFrame(wx.Frame):
 	 # Attributes
 	 self.nbk = MyNotebook(self)
 	 self.tp = TopPanel(self)
+         self.cyx = CsvAnywhere('')
 	 
 	 #layout
 	 sizer = wx.BoxSizer(wx.VERTICAL)
@@ -131,7 +122,7 @@ class MainFrame(wx.Frame):
 	 sizer.Add(self.nbk, 1, wx.EXPAND)
 	 self.CreateStatusBar()
 	 self.SetSizer(sizer)
-	 self.SetSize((400, 300))
+	 self.SetSize((800, 600))
 	 
 	 # Setup the Menu
 	 menub = wx.MenuBar()
@@ -173,17 +164,14 @@ class MainFrame(wx.Frame):
           self.cyx.sql_query=new_sql
           self.cyx.connect_db()
           rows=self.cyx.execute_query()
-          self.nbk.out2.addHeader(self.cyx.columns)
+          self.nbk.out.addHeader(self.cyx.columns)
           for row in rows:
-              self.nbk.out2.addRow(row)
-          self.nbk.out.Clear()
-          for linha in self.cyx.tabularize_it(rows):
-            self.nbk.out.AppendText(linha+"\n")
+              self.nbk.out.addRow(row)
         finally:
           btn.Enabled=True
 	 
     def LoadFromFile(self, fname):
-        self.cyx=CsvAnyware(fname)
+        self.cyx=CsvAnywhere(fname)
         self.nbk.edt.SetText(self.cyx.sql_query)
         
 
