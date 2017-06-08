@@ -46,8 +46,6 @@ class CodeEditorBase(stc.StyledTextCtrl):
 			  "face:%(font)s" % faces)
 
 
-
-
 class OutputGrid(wx.ListCtrl):
     def __init__(self,parent):
         super(OutputGrid,self).__init__(parent,
@@ -65,22 +63,50 @@ class OutputGrid(wx.ListCtrl):
         item = self.Append(tuple(row_as_a_list))
                
 class ConfigPanel(wx.Panel):
-    def __init__(self, parent, config_parameters):
+    def __init__(self, parent, config_dict):
         wx.Panel.__init__(self, parent, -1)
 
+        self.configuration={}
+        self.textCtrls={}
+        if config_dict:
+           self.SetLayout(config_dict)
 
-        sizer1 = wx.BoxSizer(wx.Vertical)
-        self.config_values={}
-        sizers = []
-        for parameter in config_parameters:
-          label = wx.StaticText(self.panel, wx.ID_ANY, parameter)
-          config_values[parameter] = wx.TextCtrl(self.panel, wx.ID_ANY, '')
-          sizer2= wx.BoxSizer(wx.HORIZONTAL)
-          sizer2.Add(label)
-          sizer2.Add(config_values[parameter])
-          sizer.Add(sizer2)
 
-        self.SetSizer(sizer)
+    def SetLayout(self, config_dict):
+        """ config_dict vem na forma { 'atributo' : valor  ... }
+            Eh criado um TextCtrl para cada atributo e o texto
+            eh setado com o valor correspondente
+        """
+        # Destroy componentes anteriores
+        for child in self.GetChildren():
+            child.Destroy() 
+ 
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.textCtrls={}
+        self.configuration = config_dict
+        for key in self.configuration.keys():
+            label = wx.StaticText(self, wx.ID_ANY, key)
+            if "\n" in self.configuration[key]:
+                self.textCtrls[key]=wx.TextCtrl(self, wx.ID_ANY,
+                                                style=wx.TE_MULTILINE, 
+                                                value=self.configuration[key])
+            else:
+                self.textCtrls[key] = wx.TextCtrl(self, wx.ID_ANY, 
+                                                  self.configuration[key])
+            self.textCtrls[key].Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+
+            sizer= wx.BoxSizer(wx.HORIZONTAL)
+            sizer.Add(label,0, wx.ALL|wx.ALIGN_RIGHT, 5)
+            sizer.Add(self.textCtrls[key],1, wx.ALIGN_RIGHT, 5)
+            main_sizer.Add(sizer,0,wx.EXPAND,5)
+        self.SetSizer(main_sizer)
+        self.Layout()
+
+    def OnKeyUp(self, event):
+        """ KeyUp comes last """
+        print "OnKeyUp Called"
+        event.Skip()
+
 
 class MyNotebook(wx.Notebook):
     def __init__(self, parent):
@@ -91,7 +117,7 @@ class MyNotebook(wx.Notebook):
 	self.log = wx.TextCtrl(self,
 				    value="The log",
 				    style=wx.TE_MULTILINE)
-        self.cfg = ConfigPanel(self,["um","dois","tres"])
+        self.cfg = ConfigPanel(self,{})
 
        
         self.out = OutputGrid(self)
@@ -134,6 +160,7 @@ class MainFrame(wx.Frame):
 	 self.nbk = MyNotebook(self)
 	 self.tp = TopPanel(self)
          self.cyx = CsvAnywhere('')
+         self.SetConfiguration()
 	 
 	 #layout
 	 sizer = wx.BoxSizer(wx.VERTICAL)
@@ -144,14 +171,14 @@ class MainFrame(wx.Frame):
 	 self.SetSize((800, 600))
 	 
 	 # Setup the Menu
-	 menub = wx.MenuBar()
+	 self.menub = wx.MenuBar()
 
 	 # File Menu
 	 filem = wx.Menu()
 	 filem.Append(wx.ID_OPEN,"&Abrir\tCtrl+O")
 	 filem.Append(wx.ID_SAVE,"&Salvar\tCtrl+S")
 	 filem.Append(wx.ID_SAVEAS,"Salvar &como\tShift+Ctrl+S")
-	 menub.Append(filem,"&Arquivo")
+	 self.menub.Append(filem,"&Arquivo")
 
 	 # Edit Menu
 	 editm = wx.Menu()
@@ -161,10 +188,10 @@ class MainFrame(wx.Frame):
 	 editm.AppendSeparator()
 	 editm.Append(ID_READ_ONLY,"Read Only",
 		      kind=wx.ITEM_CHECK)
-	 menub.Append(editm,"E&ditar")
+	 self.menub.Append(editm,"E&ditar")
 
  
-	 self.SetMenuBar(menub)
+	 self.SetMenuBar(self.menub)
 
 	 #Event Handler
 	 self.Bind(wx.EVT_MENU,self.OnMenu)  
@@ -188,7 +215,23 @@ class MainFrame(wx.Frame):
               self.nbk.out.addRow(row)
         finally:
           btn.Enabled=True
-	 
+
+    def SetConfiguration(self):
+        #Apenas essas configuracoes sao aceitas
+        #O Sql nao eh carregado aqui
+        keys =[
+		"resumo", 
+		"exportar", 
+		"pos_exec",
+		"exportar_nomes_campos", 
+		"caracter_separacao",
+		"descricao", 
+                "string_conexao_pyodbc",
+                "separador_decimal"]
+        
+	config_dict ={ key: self.cyx.__dict__[key] for key in keys }
+        self.nbk.cfg.SetLayout(config_dict)	 
+
     def LoadFromFile(self, fname):
         self.cyx=CsvAnywhere(fname)
         self.nbk.edt.SetText(self.cyx.sql_query)
@@ -197,6 +240,16 @@ class MainFrame(wx.Frame):
     def SaveToFile(self):
         self.cyx.sql_query=self.nbk.edt.GetText()
         self.cyx.write_config(self.cyx.filename)
+        self.menub.Enable(wx.ID_SAVE,False)
+
+    def Modified():
+        self.menub.Enable(wx.ID_SAVE,True)
+        
+
+    def OnKeyUp(self, event):
+        print "OnKeyUp Called 2"
+        self.Modified() 
+        event.Skip()
 
     def OnMenu(self, event):
 	""" Handle menu clicks """
@@ -221,8 +274,13 @@ class MainFrame(wx.Frame):
 	       fname = dlg.GetPath()
 	       self.LoadFromFile(fname)
 	       self.PushStatusText(fname)
+               self.SetConfiguration()
+	elif evt_id == wx.ID_SAVE:
+            self.SaveToFile()
+            
         else:
            event.Skip()
+
 if __name__=="__main__":
      app = wx.App(False)
      win = MainFrame()

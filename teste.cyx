@@ -6,12 +6,15 @@ descricao: 'Aqui vai a descrição/instruções
   '
 exportar: !!python/unicode 'teste.csv'
 exportar_nomes_campos: !!python/unicode '1'
-filename: teste.cyx
-param_names: []
+filename: !!python/unicode '/home/alexandre/Documentos/Programming/Python/csva/teste.cyx'
 pos_exec: !!python/unicode ''
 resumo: !!python/unicode 'Nova consulta 1'
 separador_decimal: ','
-sql_query: 'select * from employees
+sql_query: !!python/unicode '
+
+  select * from employees
+
+  where title like "SALE%"
 
   '
 string_conexao_pyodbc: DSN=chinook

@@ -112,7 +112,19 @@ class CsvAnywhere():
 
   def write_config(self,filename):
     # Write YAML file
-    properties=vars(self)
+
+    exclude =[
+            "cursor",
+            "connection",
+            "columns",
+            "param_names",
+            "param_values"
+            ]
+
+    variables=vars(self)
+
+    properties ={ key: variables[key] for key in variables if key not in exclude }
+    print properties
     with io.open(filename, 'w', encoding='utf8') as outfile:
       yaml.dump(properties, outfile, default_flow_style=False, allow_unicode=True)
 
