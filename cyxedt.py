@@ -1,8 +1,14 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import wx
 import wx.grid as gridlib
 import wx.stc as stc
 import keyword
 from csva import *
+import wx.lib.newevent
+
+ChangedEvent, EVT_CHANGED = wx.lib.newevent.NewCommandEvent()
 
 class CodeEditorBase(stc.StyledTextCtrl):
 
@@ -104,7 +110,8 @@ class ConfigPanel(wx.Panel):
 
     def OnKeyUp(self, event):
         """ KeyUp comes last """
-        print "OnKeyUp Called"
+        print "."
+        wx.PostEvent(self, ChangedEvent(self.GetId()))
         event.Skip()
 
 
@@ -153,14 +160,12 @@ ID_READ_ONLY = wx.NewId()
 
 class MainFrame(wx.Frame):
      
-    def __init__(self):
+    def __init__(self, filename=''):
 	 wx.Frame.__init__(self, None, -1, 'CyxEditor 1.0')
  
 	 # Attributes
 	 self.nbk = MyNotebook(self)
 	 self.tp = TopPanel(self)
-         self.cyx = CsvAnywhere('')
-         self.SetConfiguration()
 	 
 	 #layout
 	 sizer = wx.BoxSizer(wx.VERTICAL)
@@ -196,6 +201,13 @@ class MainFrame(wx.Frame):
 	 #Event Handler
 	 self.Bind(wx.EVT_MENU,self.OnMenu)  
          self.Bind(wx.EVT_BUTTON, self.OnButton)
+         self.Bind(EVT_CHANGED, self.OnConfigChanged)
+
+         if filename:
+             self.LoadFromFile(filename)
+         else:
+             self.cyx = CsvAnywhere(filename)
+             self.SetConfiguration()
 
     def OnButton(self, event):
 	btn = event.GetEventObject()
@@ -235,6 +247,8 @@ class MainFrame(wx.Frame):
     def LoadFromFile(self, fname):
         self.cyx=CsvAnywhere(fname)
         self.nbk.edt.SetText(self.cyx.sql_query)
+	self.PushStatusText(fname)
+        self.SetConfiguration()
         
 
     def SaveToFile(self):
@@ -242,7 +256,7 @@ class MainFrame(wx.Frame):
         self.cyx.write_config(self.cyx.filename)
         self.menub.Enable(wx.ID_SAVE,False)
 
-    def Modified():
+    def OnConfigChanged(self,event):
         self.menub.Enable(wx.ID_SAVE,True)
         
 
@@ -273,16 +287,27 @@ class MainFrame(wx.Frame):
 	   if dlg.ShowModal() == wx.ID_OK:
 	       fname = dlg.GetPath()
 	       self.LoadFromFile(fname)
-	       self.PushStatusText(fname)
-               self.SetConfiguration()
 	elif evt_id == wx.ID_SAVE:
             self.SaveToFile()
             
         else:
            event.Skip()
 
+def main(parser):
+  parser.add_argument("filename",nargs='?',default='',help="arquivo do tipo CYX (consulta odbc e exportacao)")
+  args = parser.parse_args()
+  app = wx.App(False)
+  win = MainFrame(args.filename)
+  win.Show(True)
+  app.MainLoop()
+  
+    
+
 if __name__=="__main__":
-     app = wx.App(False)
-     win = MainFrame()
-     win.Show(True)
-     app.MainLoop()
+  parser = argparse.ArgumentParser()
+  try:
+    main(parser) 
+  except:
+    traceback.print_exc(file=sys.stdout)
+    print "Pressione qualquer tecla para continuar..."
+    stdin.readline().rstrip("\n") 
