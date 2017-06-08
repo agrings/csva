@@ -67,6 +67,8 @@ class OutputGrid(wx.ListCtrl):
     def addRow(self, row_as_a_list ):
         """ Adds a row to the grid """
         item = self.Append(tuple(row_as_a_list))
+
+  
                
 class ConfigPanel(wx.Panel):
     def __init__(self, parent, config_dict):
@@ -222,6 +224,7 @@ class MainFrame(wx.Frame):
           self.cyx.sql_query=new_sql
           self.cyx.connect_db()
           rows=self.cyx.execute_query()
+          self.nbk.out.ClearAll()
           self.nbk.out.addHeader(self.cyx.columns)
           for row in rows:
               self.nbk.out.addRow(row)
