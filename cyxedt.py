@@ -128,6 +128,8 @@ class MyNotebook(wx.Notebook):
 
 	#Attributes
 	self.edt = CodeEditorBase(self)
+        self.edt.SetLexerLanguage('sql')
+        self.edt.SetProperty('fold','1')
 	self.log = wx.TextCtrl(self,
 				    value="The log",
 				    style=wx.TE_MULTILINE)
