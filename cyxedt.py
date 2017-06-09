@@ -179,6 +179,8 @@ class MainFrame(wx.Frame):
 	 sizer.Add(self.tp, 0, wx.EXPAND)
 	 sizer.Add(self.nbk, 1, wx.EXPAND)
 	 self.CreateStatusBar()
+         self.StatusBar.SetFieldsCount(2)
+         self.StatusBar.SetStatusWidths([-4,-1]) #Relative widths
 	 self.SetSizer(sizer)
 	 self.SetSize((800, 600))
 	 
@@ -209,12 +211,17 @@ class MainFrame(wx.Frame):
 	 self.Bind(wx.EVT_MENU,self.OnMenu)  
          self.Bind(wx.EVT_BUTTON, self.OnButton)
          self.Bind(EVT_CHANGED, self.OnConfigChanged)
+         self.Bind(stc.EVT_STC_MODIFIED, self.OnModifyQuery)
 
+         self.nbk.edt.EnableLineNumbers()
          if filename:
              self.LoadFromFile(filename)
          else:
              self.cyx = CsvAnywhere(filename)
-             self.SetConfiguration()
+             #SetConfig
+
+    def OnModifyQuery(self,event):
+        self.menub.Enable(wx.ID_SAVE,True)
 
     def OnButton(self, event):
 	btn = event.GetEventObject()
@@ -241,7 +248,8 @@ class MainFrame(wx.Frame):
         self.cyx=CsvAnywhere(fname)
         self.nbk.edt.SetText(self.cyx.sql_query)
         self.nbk.cfg.SetConfig(self.cyx.get_config())	 
-	self.PushStatusText(fname)
+	self.SetStatusText(fname,0)
+	self.SetStatusText("l1,c1",1)
         
 
     def SaveToFile(self):
@@ -280,7 +288,17 @@ class MainFrame(wx.Frame):
 	       self.LoadFromFile(fname)
 	elif evt_id == wx.ID_SAVE:
             self.SaveToFile()
-            
+        elif evt_id == wx.ID_SAVEAS:
+            dlg = wx.FileDialog(self, "Salvar arquivo como...", 
+                                os.getcwd(), "", "*.cyx", \
+                    wx.SAVE|wx.OVERWRITE_PROMPT)
+            result = dlg.ShowModal()
+            fname = dlg.GetPath()
+            dlg.Destroy()
+
+            if result == wx.ID_OK:          #Save button was pressed
+                self.cyx.filename=fname
+                self.SaveToFile()
         else:
            event.Skip()
 
