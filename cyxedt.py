@@ -74,13 +74,18 @@ class ConfigPanel(wx.Panel):
     def __init__(self, parent, config_dict):
         wx.Panel.__init__(self, parent, -1)
 
-        self.configuration={}
         self.textCtrls={}
         if config_dict:
-           self.SetLayout(config_dict)
+           self.SetConfig(config_dict)
 
 
-    def SetLayout(self, config_dict):
+    def GetConfig(self):
+        new_config={}
+        for key in self.textCtrls.keys():
+            new_config[key]=self.textCtrls[key].GetValue()
+        return new_config
+
+    def SetConfig(self, config_dict):
         """ config_dict vem na forma { 'atributo' : valor  ... }
             Eh criado um TextCtrl para cada atributo e o texto
             eh setado com o valor correspondente
@@ -91,16 +96,17 @@ class ConfigPanel(wx.Panel):
  
         main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.textCtrls={}
-        self.configuration = config_dict
-        for key in self.configuration.keys():
+        for key in config_dict.keys():
+            if key=='sql_query':
+                continue
             label = wx.StaticText(self, wx.ID_ANY, key)
-            if "\n" in self.configuration[key]:
+            if "\n" in config_dict[key]:
                 self.textCtrls[key]=wx.TextCtrl(self, wx.ID_ANY,
                                                 style=wx.TE_MULTILINE, 
-                                                value=self.configuration[key])
+                                                value=config_dict[key])
             else:
                 self.textCtrls[key] = wx.TextCtrl(self, wx.ID_ANY, 
-                                                  self.configuration[key])
+                                                  config_dict[key])
             self.textCtrls[key].Bind(wx.EVT_KEY_UP, self.OnKeyUp)
 
             sizer= wx.BoxSizer(wx.HORIZONTAL)
@@ -112,7 +118,6 @@ class ConfigPanel(wx.Panel):
 
     def OnKeyUp(self, event):
         """ KeyUp comes last """
-        print "."
         wx.PostEvent(self, ChangedEvent(self.GetId()))
         event.Skip()
 
@@ -231,30 +236,17 @@ class MainFrame(wx.Frame):
         finally:
           btn.Enabled=True
 
-    def SetConfiguration(self):
-        #Apenas essas configuracoes sao aceitas
-        #O Sql nao eh carregado aqui
-        keys =[
-		"resumo", 
-		"exportar", 
-		"pos_exec",
-		"exportar_nomes_campos", 
-		"caracter_separacao",
-		"descricao", 
-                "string_conexao_pyodbc",
-                "separador_decimal"]
-        
-	config_dict ={ key: self.cyx.__dict__[key] for key in keys }
-        self.nbk.cfg.SetLayout(config_dict)	 
 
     def LoadFromFile(self, fname):
         self.cyx=CsvAnywhere(fname)
         self.nbk.edt.SetText(self.cyx.sql_query)
+        self.nbk.cfg.SetConfig(self.cyx.get_config())	 
 	self.PushStatusText(fname)
-        self.SetConfiguration()
         
 
     def SaveToFile(self):
+        new_config=self.nbk.cfg.GetConfig()
+        self.cyx.set_config(new_config)
         self.cyx.sql_query=self.nbk.edt.GetText()
         self.cyx.write_config(self.cyx.filename)
         self.menub.Enable(wx.ID_SAVE,False)
@@ -263,10 +255,6 @@ class MainFrame(wx.Frame):
         self.menub.Enable(wx.ID_SAVE,True)
         
 
-    def OnKeyUp(self, event):
-        print "OnKeyUp Called 2"
-        self.Modified() 
-        event.Skip()
 
     def OnMenu(self, event):
 	""" Handle menu clicks """

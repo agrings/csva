@@ -103,6 +103,25 @@ class CsvAnywhere():
   def config(self, attributes, key, default_value):
       return attributes[key] if (key in attributes.keys()) else default_value
   
+  def get_config(self):
+      allowed_keys =[
+                "sql_query",
+		"resumo", 
+		"exportar", 
+		"pos_exec",
+		"exportar_nomes_campos", 
+		"caracter_separacao",
+		"descricao", 
+                "string_conexao_pyodbc",
+                "separador_decimal"]
+        
+      return { key: self.__dict__[key] for key in allowed_keys }
+
+  def set_config(self, new_config):
+      """ new_config eh um dicionario """
+      for key in new_config:
+          self.__dict__[key]=new_config[key]
+  
   def read_config(self,filename):
 
     # Read YAML file
@@ -113,17 +132,7 @@ class CsvAnywhere():
   def write_config(self,filename):
     # Write YAML file
 
-    exclude =[
-            "cursor",
-            "connection",
-            "columns",
-            "param_names",
-            "param_values"
-            ]
-
-    variables=vars(self)
-
-    properties ={ key: variables[key] for key in variables if key not in exclude }
+    properties = self.get_config()
     print properties
     with io.open(filename, 'w', encoding='utf8') as outfile:
       yaml.dump(properties, outfile, default_flow_style=False, allow_unicode=True)
