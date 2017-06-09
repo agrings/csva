@@ -128,7 +128,7 @@ class MyNotebook(wx.Notebook):
 
 	#Attributes
 	self.edt = CodeEditorBase(self)
-        self.edt.SetLexerLanguage('sql')
+        self.edt.SetLexer(stc.STC_LEX_SQL)
         self.edt.SetProperty('fold','1')
 	self.log = wx.TextCtrl(self,
 				    value="The log",
