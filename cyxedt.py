@@ -212,6 +212,7 @@ class MainFrame(wx.Frame):
          self.Bind(wx.EVT_BUTTON, self.OnButton)
          self.Bind(EVT_CHANGED, self.OnConfigChanged)
          self.Bind(stc.EVT_STC_MODIFIED, self.OnModifyQuery)
+         self.Bind(stc.EVT_STC_UPDATEUI, self.OnPosChanged)
 
          self.nbk.edt.EnableLineNumbers()
          if filename:
@@ -219,6 +220,12 @@ class MainFrame(wx.Frame):
          else:
              self.cyx = CsvAnywhere(filename)
              #SetConfig
+
+    def OnPosChanged(self,event):
+        edt=self.nbk.edt
+        pos=edt.GetCurrentPos()
+        pos_tuple=(edt.GetColumn(pos)+1,edt.LineFromPosition(pos)+1)
+        self.StatusBar.SetStatusText("C=%d,L=%d" % pos_tuple,1)
 
     def OnModifyQuery(self,event):
         self.menub.Enable(wx.ID_SAVE,True)
