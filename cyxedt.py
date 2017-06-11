@@ -22,7 +22,7 @@ class CodeEditorBase(stc.StyledTextCtrl):
 	self.size = font.GetPointSize()
         self.filename = ""
 	# Setup
-	self.SetupBaseStyles()
+        self.SetupBaseStyles()
       
 
     def EnableLineNumbers(self, enable=True):
@@ -128,8 +128,10 @@ class MyNotebook(wx.Notebook):
 
 	#Attributes
 	self.edt = CodeEditorBase(self)
-        self.edt.SetLexer(stc.STC_LEX_SQL)
-        self.edt.SetProperty('fold','1')
+        #self.edt.SetLexer(stc.STC_LEX_SQL)
+        #self.edt.Colourise(0, self.edt.GetTextLength())
+        #self.edt.SetProperty('fold','1')
+        self.edt.SetKeyWords(0,"SELECT FROM WHERE")
 	self.log = wx.TextCtrl(self,
 				    value="The log",
 				    style=wx.TE_MULTILINE)
@@ -139,7 +141,6 @@ class MyNotebook(wx.Notebook):
         self.out = OutputGrid(self)
 
 	# Setup
-	#self.AddPage(self.textctrl, "Text Editor")
 	self.AddPage(self.edt, "Text Editor")
 	self.AddPage(self.log, "Activity Log")
 	self.AddPage(self.cfg, "Configuration")
@@ -259,6 +260,8 @@ class MainFrame(wx.Frame):
         self.nbk.cfg.SetConfig(self.cyx.get_config())	 
 	self.SetStatusText(fname,0)
 	self.SetStatusText("l1,c1",1)
+        self.nbk.edt.Colourise(0, self.nbk.edt.GetTextLength())
+ 
         
 
     def SaveToFile(self):
