@@ -7,6 +7,9 @@ import wx.stc as stc
 import keyword
 from csva import *
 import wx.lib.newevent
+import wx.lib.agw.aquabutton as AB
+import wx.lib.agw.gradientbutton as GB
+
 
 ChangedEvent, EVT_CHANGED = wx.lib.newevent.NewCommandEvent()
 
@@ -153,9 +156,13 @@ class TopPanel(wx.Panel):
 	
 	sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        bmp = wx.Bitmap("execute.bmp")
-        button = wx.Button(self, label= "Executar")
-        button.SetBitmap(bmp)
+	bmp=wx.Bitmap("hourglass_run.png", wx.BITMAP_TYPE_ANY)
+	#bmp=wx.Bitmap("stopwatch_run.png", wx.BITMAP_TYPE_ANY)
+        #button = AB.AquaButton(self, bitmap=bmp, label="Run")
+        #button = GB.GradientButton(self, bitmap=bmp, label="Run")
+        button = wx.BitmapButton(self, bitmap=bmp)
+
+        button.SetBitmap(bmp,wx.TOP)
         self.Refresh()
 	sizer.Add(button)
 	button.Bind(wx.EVT_BUTTON, self.OnButton)
