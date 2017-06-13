@@ -147,12 +147,13 @@ class MyNotebook(wx.Notebook):
         #self.edt.SetProperty('fold','1')
         self.edt.SetKeyWords(0,"SELECT FROM WHERE")
 	self.log = wx.TextCtrl(self,
-				    value="The log",
+				    value="Starting log",
 				    style=wx.TE_MULTILINE)
         self.cfg = ConfigPanel(self,{})
-
-       
         self.out = OutputGrid(self)
+        # redirect text here
+        sys.stdout=self.log
+        sys.stderr=self.log
 
 	# Setup
 	self.AddPage(self.edt, "Text Editor")
