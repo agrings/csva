@@ -169,6 +169,7 @@ class CsvAnywhere():
       self.param_names = older_xqkt.parametros
       self.string_conexao_windows = older_xqkt.string_conexao_windows 
       self.string_conexao_pyodbc = older_xqkt.string_conexao_pyodbc
+      self.separador_decimal = ',' #nao existe no xqkt
       self.write_config(self.filename) #converte para novo formato
     else:
       configuration = self.read_config(filename)
