@@ -12,6 +12,17 @@ import wx.lib.agw.gradientbutton as GB
 
 
 ChangedEvent, EVT_CHANGED = wx.lib.newevent.NewCommandEvent()
+def AddAppPath(filename):
+    """
+    Adds the executable path to the filename 
+    """
+    # determine if application is a script file or frozen exe
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.dirname(sys.executable)
+    elif __file__:
+        application_path = os.path.dirname(__file__)
+
+    return os.path.join(application_path, filename)
 
 class CodeEditorBase(stc.StyledTextCtrl):
 
@@ -155,8 +166,8 @@ class TopPanel(wx.Panel):
 
 	
 	sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-	bmp=wx.Bitmap("hourglass_run.png", wx.BITMAP_TYPE_ANY)
+        bmp_path = AddAppPath("hourglass_run.png")
+	bmp=wx.Bitmap(bmp_path, wx.BITMAP_TYPE_ANY)
 	#bmp=wx.Bitmap("stopwatch_run.png", wx.BITMAP_TYPE_ANY)
         #button = AB.AquaButton(self, bitmap=bmp, label="Run")
         #button = GB.GradientButton(self, bitmap=bmp, label="Run")
