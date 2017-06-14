@@ -12,6 +12,7 @@ import wx.lib.agw.gradientbutton as GB
 
 
 ChangedEvent, EVT_CHANGED = wx.lib.newevent.NewCommandEvent()
+
 def AddAppPath(filename):
     """
     Adds the executable path to the filename 
@@ -82,7 +83,52 @@ class OutputGrid(wx.ListCtrl):
         """ Adds a row to the grid """
         item = self.Append(tuple(row_as_a_list))
 
-  
+ 
+class ReadParamDialog(wx.Dialog):
+    #----------------------------------------------------------------------
+    def __init__(self,param_dict):
+        """Constructor"""
+        wx.Dialog.__init__(self, None, title="Entre com os parametros para a consulta")
+
+        # Destroy componentes anteriores
+        for child in self.GetChildren():
+            child.Destroy()
+
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.textCtrls={}
+
+        for key in param_dict.keys():
+            label = wx.StaticText(self, wx.ID_ANY, key)
+            if "\n" in param_dict[key]:
+                self.textCtrls[key]=wx.TextCtrl(self, wx.ID_ANY,
+                                                style=wx.TE_MULTILINE,
+                                                value=param_dict[key])
+            else:
+                self.textCtrls[key] = wx.TextCtrl(self, wx.ID_ANY,
+                                                  param_dict[key])
+            self.textCtrls[key].Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+
+            sizer= wx.BoxSizer(wx.HORIZONTAL)
+            sizer.Add(label,0, wx.ALL|wx.ALIGN_RIGHT, 5)
+            sizer.Add(self.textCtrls[key],1, wx.ALIGN_RIGHT, 5)
+            main_sizer.Add(sizer,0,wx.EXPAND,5)
+
+        # Bottom sizer (buttons)
+        bottom_sizer= wx.BoxSizer(wx.HORIZONTAL)
+        okBtn = wx.Button(self, wx.ID_OK)
+        clBtn = wx.Button(self, wx.ID_CANCEL)
+
+        bottom_sizer.Add(okBtn, 0, wx.ALL|wx.CENTER, 5)
+        bottom_sizer.Add(clBtn, 0, wx.ALL|wx.CENTER, 5)
+        main_sizer.Add(bottom_sizer,0,wx.EXPAND,5)
+
+        #The main sizer
+        self.SetSizer(main_sizer)
+
+    def OnKeyUp(self, event):
+        """ KeyUp comes last """
+        event.Skip()
+ 
                
 class ConfigPanel(wx.Panel):
     def __init__(self, parent, config_dict):
@@ -253,8 +299,20 @@ class MainFrame(wx.Frame):
         self.menub.Enable(wx.ID_SAVE,True)
 
     def OnButton(self, event):
+        if self.cyx.param_names :
+          params = { k:'' for k in self.cyx.param_names }
+          dlg = ReadParamDialog(params)
+          res=dlg.ShowModal()
+          self.cyx.param_values=[]
+          if res== wx.ID_OK:
+              for key in dlg.textCtrls:
+                  self.cyx.param_values+=[dlg.textCtrls[key].GetValue()] 
+          else:
+            return 
+        
 	btn = event.GetEventObject()
         btn.Enabled=False
+        
         try:
           sav_sql=self.cyx.sql_query
           new_sql=self.nbk.edt.GetText()
