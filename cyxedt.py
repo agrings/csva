@@ -72,6 +72,7 @@ class OutputGrid(wx.ListCtrl):
         super(OutputGrid,self).__init__(parent,
                                          style=wx.LC_REPORT)
     
+
     def addHeader(self,header_list):
         """ Add column headers """
         i=0
@@ -79,9 +80,17 @@ class OutputGrid(wx.ListCtrl):
             self.InsertColumn(i,name)
             i+=1
             
-    def addRow(self, row_as_a_list ):
-        """ Adds a row to the grid """
-        item = self.Append(tuple(row_as_a_list))
+    def AddRows(self, value_matrix ):
+        """  Add values to the grid
+             value_matrix is in the format:
+              [ [ row1col1, row1col2...] 
+                [ row2col1, rowcol2...] ...] 
+        """
+        for row in value_matrix:
+            self.Append(tuple(row))
+        for col in range(self.GetColumnCount()):
+            self.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+
 
  
 class ReadParamDialog(wx.Dialog):
@@ -325,8 +334,7 @@ class MainFrame(wx.Frame):
           rows=self.cyx.execute_query()
           self.nbk.out.ClearAll()
           self.nbk.out.addHeader(self.cyx.columns)
-          for row in rows:
-              self.nbk.out.addRow(row)
+          self.nbk.out.AddRows(rows)
         finally:
           btn.Enabled=True
 
