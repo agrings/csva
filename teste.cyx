@@ -1,4 +1,4 @@
-caracter_separacao: ;
+caracter_separacao: !!python/unicode ';'
 descricao: 'Aqui vai a descrição/instruções
 
   MySql OK
@@ -6,16 +6,21 @@ descricao: 'Aqui vai a descrição/instruções
   '
 exportar: !!python/unicode 'teste.csv'
 exportar_nomes_campos: !!python/unicode '1'
-filename: !!python/unicode '/home/alexandre/Documentos/Programming/Python/csva/teste.cyx'
 pos_exec: !!python/unicode ''
 resumo: !!python/unicode 'Nova consulta 1'
-separador_decimal: ','
+separador_decimal: !!python/unicode ','
 sql_query: !!python/unicode '
 
-  select * from employees
+  select * from companies
 
-  where title like "SALE%"
+  where sector="Industrials"
 
-  '
-string_conexao_pyodbc: DSN=chinook
-string_conexao_windows: ''
+  and state like "%[ESTADO]%"
+
+
+  /*
+
+  select * from stock_prices
+
+  */'
+string_conexao_pyodbc: !!python/unicode 'DSN=sp500'
