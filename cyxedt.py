@@ -207,8 +207,8 @@ class MyNotebook(wx.Notebook):
         self.cfg = ConfigPanel(self,{})
         self.out = OutputGrid(self)
         # redirect text here
-        sys.stdout=self.log
-        sys.stderr=self.log
+        #sys.stdout=self.log
+        #sys.stderr=self.log
 
 	# Setup
 	self.AddPage(self.edt, "Text Editor")
@@ -316,7 +316,8 @@ class MainFrame(wx.Frame):
           if res== wx.ID_OK:
               for key in dlg.textCtrls:
                   self.cyx.param_values+=[dlg.textCtrls[key].GetValue()] 
-          else:
+          dlg.Destroy()
+          if res != wx.ID_OK:
             return 
         
 	btn = event.GetEventObject()
@@ -332,11 +333,16 @@ class MainFrame(wx.Frame):
           self.cyx.sql_query=new_sql
           self.cyx.connect_db()
           rows=self.cyx.execute_query()
+          
           self.nbk.out.ClearAll()
           self.nbk.out.addHeader(self.cyx.columns)
           self.nbk.out.AddRows(rows)
+        except:
+            traceback.print_exc(file=sys.stdout)
+          
         finally:
           btn.Enabled=True
+          event.Skip()
 
 
     def LoadFromFile(self, fname):
@@ -402,7 +408,9 @@ class MainFrame(wx.Frame):
 def main(parser):
   parser.add_argument("filename",nargs='?',default='',help="arquivo do tipo CYX (consulta odbc e exportacao)")
   args = parser.parse_args()
+
   app = wx.App(False)
+
   win = MainFrame(args.filename)
   win.Show(True)
   app.MainLoop()
