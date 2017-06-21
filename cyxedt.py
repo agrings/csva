@@ -131,7 +131,7 @@ class TestVirtualList(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Colum
         for row in value_matrix:
             self.Append(tuple(row))
         for col in range(num_cols):
-            self.listCtrl.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+            self.SetColumnWidth(col, wx.LIST_AUTOSIZE)
 
 
     def OnColClick(self,event):
