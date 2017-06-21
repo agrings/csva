@@ -9,6 +9,7 @@ from csva import *
 import wx.lib.newevent
 import wx.lib.agw.aquabutton as AB
 import wx.lib.agw.gradientbutton as GB
+import wx.lib.mixins.listctrl as listmix
 
 
 ChangedEvent, EVT_CHANGED = wx.lib.newevent.NewCommandEvent()
@@ -67,29 +68,130 @@ class CodeEditorBase(stc.StyledTextCtrl):
 			  "face:%(font)s" % faces)
 
 
-class OutputGrid(wx.ListCtrl):
-    def __init__(self,parent):
-        super(OutputGrid,self).__init__(parent,
-                                         style=wx.LC_REPORT)
-    
+class TestVirtualList(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.ColumnSorterMixin):
+    def __init__(self, parent, header,data):
+        wx.ListCtrl.__init__( self, parent, -1, style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_HRULES|wx.LC_VRULES)
 
-    def addHeader(self,header_list):
+        #adding some art
+        self.il = wx.ImageList(16, 16)
+        a={"sm_up":"GO_UP","sm_dn":"GO_DOWN","w_idx":"WARNING","e_idx":"ERROR","i_idx":"QUESTION"}
+        for k,v in a.items():
+            s="self.%s= self.il.Add(wx.ArtProvider_GetBitmap(wx.ART_%s,wx.ART_TOOLBAR,(16,16)))" % (k,v)
+            exec(s)
+        self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
+
+        #adding some attributes (colourful background for each item rows)
+        self.attr1 = wx.ListItemAttr()
+        self.attr1.SetBackgroundColour("light green")
+
+        #building the columns
+        #self.AddHeader(header)
+        #self.AddRows(data)
+
+        #These two should probably be passed to init more cleanly
+        #setting the numbers of items = number of elements in the dictionary
+        self.itemDataMap = data
+        self.itemIndexMap = data.keys()
+        self.SetItemCount(len(data))
+        
+        #mixins
+        listmix.ListCtrlAutoWidthMixin.__init__(self)
+        #listmix.ColumnSorterMixin.__init__(self, 0)
+
+        #sort by genre (column 2), A->Z ascending order (1)
+        #self.SortListItems(2, 1)
+
+        #events
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
+        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected)
+        self.Bind(wx.EVT_LIST_COL_CLICK, self.OnColClick)
+
+    def AddHeader(self,header_list):
         """ Add column headers """
         i=0
+        self.ClearAll()
         for name in header_list:
             self.InsertColumn(i,name)
             i+=1
-            
+
     def AddRows(self, value_matrix ):
         """  Add values to the grid
              value_matrix is in the format:
-              [ [ row1col1, row1col2...] 
-                [ row2col1, rowcol2...] ...] 
+              { 0: [ row1col1, row1col2...] 
+                1: [ row2col1, rowcol2...] ...} 
         """
+        for i in range(len(value_matrix)):
+           self.itemDataMap[i]=value_matrix[i] 
+        self.itemIndexMap = self.itemDataMap.keys()
+        num_cols=self.GetColumnCount()
+        listmix.ColumnSorterMixin.__init__(self, num_cols)
+        self.SetItemCount(len(value_matrix))
+        i=0
         for row in value_matrix:
             self.Append(tuple(row))
-        for col in range(self.GetColumnCount()):
-            self.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+        for col in range(num_cols):
+            self.listCtrl.SetColumnWidth(col, wx.LIST_AUTOSIZE)
+
+
+    def OnColClick(self,event):
+        event.Skip()
+
+    def OnItemSelected(self, event):
+        self.currentItem = event.m_itemIndex
+
+    def OnItemActivated(self, event):
+        self.currentItem = event.m_itemIndex
+
+    def getColumnText(self, index, col):
+        item = self.GetItem(index, col)
+        return item.GetText()
+
+    def OnItemDeselected(self, evt):
+        print ("OnItemDeselected: %s" % evt.m_itemIndex)
+
+
+    #---------------------------------------------------
+    # These methods are callbacks for implementing the
+    # "virtualness" of the list...
+
+    def OnGetItemText(self, item, col):
+        index=self.itemIndexMap[item]
+        s = self.itemDataMap[index][col]
+        return s
+
+    def OnGetItemImage(self, item):
+            return -1
+
+    def OnGetItemAttr(self, item):
+        index=self.itemIndexMap[item]
+
+        if index%2:
+            return self.attr1
+        else:
+            return None
+
+    #---------------------------------------------------
+    # Matt C, 2006/02/22
+    # Here's a better SortItems() method --
+    # the ColumnSorterMixin.__ColumnSorter() method already handles the ascending/descending,
+    # and it knows to sort on another column if the chosen columns have the same value.
+
+    def SortItems(self,sorter=cmp):
+        items = list(self.itemDataMap.keys())
+        items.sort(sorter)
+        self.itemIndexMap = items
+        
+        # redraw the list
+        self.Refresh()
+
+    # Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
+    def GetListCtrl(self):
+        return self
+
+    # Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
+    def GetSortImages(self):
+        return (self.sm_dn, self.sm_up)
 
 
  
@@ -205,10 +307,11 @@ class MyNotebook(wx.Notebook):
 				    value="Starting log",
 				    style=wx.TE_MULTILINE)
         self.cfg = ConfigPanel(self,{})
-        self.out = OutputGrid(self)
+        #self.out = OutputGrid(self)
+        self.out = TestVirtualList(self,[], {})
         # redirect text here
-        #sys.stdout=self.log
-        #sys.stderr=self.log
+        sys.stdout=self.log
+        sys.stderr=self.log
 
 	# Setup
 	self.AddPage(self.edt, "Text Editor")
@@ -310,6 +413,8 @@ class MainFrame(wx.Frame):
     def OnButton(self, event):
         if self.cyx.param_names :
           params = { k:'' for k in self.cyx.param_names }
+          print "Lendo parametros.."
+          print params
           dlg = ReadParamDialog(params)
           res=dlg.ShowModal()
           self.cyx.param_values=[]
@@ -331,11 +436,13 @@ class MainFrame(wx.Frame):
             new_sql=self.nbk.edt.GetSelectedText()
 
           self.cyx.sql_query=new_sql
+          print "Conectando ao banco..."
           self.cyx.connect_db()
+          print "Executando query..."
           rows=self.cyx.execute_query()
           
-          self.nbk.out.ClearAll()
-          self.nbk.out.addHeader(self.cyx.columns)
+          print "Preenchendo grid..."
+          self.nbk.out.AddHeader(self.cyx.columns)
           self.nbk.out.AddRows(rows)
         except:
             traceback.print_exc(file=sys.stdout)
