@@ -269,19 +269,27 @@ class CsvAnywhere():
       max_sizes+=[len(column)]
   
     new_rows=[]
-    for row in rows:
-      (str_list,new_sizes)=self.format_row_as_a_list(row)
-      max_sizes=[ a if a> b else b for a,b in zip(max_sizes,new_sizes) ]
-      new_rows+=[str_list]
-  
+    try:
+      for row in rows:
+        (str_list,new_sizes)=self.format_row_as_a_list(row)
+        max_sizes=[ a if a> b else b for a,b in zip(max_sizes,new_sizes) ]
+        new_rows+=[str_list]
+    except:
+      print row
+      raise
+
     format_str=""
     for field,size in zip(new_rows[0],max_sizes):
       alignment = "%" if isnumber(field) else "%-"
       format_str += alignment+str(size)+"s|"
 
     str_rows = [ format_str % tuple(self.columns) ]
-    for row in new_rows:
-      str_rows += [ format_str % tuple(row) ]
+    try:
+      for row in new_rows:
+        str_rows += [ format_str % tuple(row) ]
+    except:
+      print row
+      raise
     
     return str_rows
 
@@ -377,6 +385,8 @@ def main(parser):
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser()
+  reload(sys)
+  sys.setdefaultencoding('utf8')
   try:
     main(parser) 
   except:
