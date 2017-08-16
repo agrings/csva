@@ -6,7 +6,7 @@ descricao: 'Aqui vai a descrição/instruções
   '
 exportar: !!python/unicode 'teste.csv'
 exportar_nomes_campos: !!python/unicode '1'
-pos_exec: !!python/unicode ''
+pos_exec: !!python/unicode 'cat teste.csv'
 resumo: !!python/unicode 'Nova consulta 1'
 separador_decimal: !!python/unicode ','
 sql_query: !!python/unicode '

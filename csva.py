@@ -347,7 +347,8 @@ def run_it(cyx, param_values, tabularize, temp_export):
     open(cyx.exportar+".OK","a").close()
   else:
     print "Executando :{}".format(cyx.pos_exec)
-    os.system(cyx.pos_exec)
+    #os.system(cyx.pos_exec)
+    os.spawnl(os.P_NOWAIT,cyx.pos_exec)
 
 
 
