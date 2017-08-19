@@ -35,6 +35,15 @@ import tempfile
 import datetime
 import traceback
 
+from subprocess import Popen
+
+def exec_and_let_die(cmd_str):
+
+   cmd = cmd_str.split() #popen exige lista 
+   proc = Popen(cmd, shell=False,
+             stdin=None, stdout=None, stderr=None, close_fds=True)
+
+
 def usage():
   print __doc__
 
@@ -348,7 +357,7 @@ def run_it(cyx, param_values, tabularize, temp_export):
   else:
     print "Executando :{}".format(cyx.pos_exec)
     #os.system(cyx.pos_exec)
-    os.spawnl(os.P_NOWAIT,cyx.pos_exec)
+    exec_and_let_die(cyx.pos_exec)
 
 
 
