@@ -34,6 +34,7 @@ import argparse
 import tempfile
 import datetime
 import traceback
+import numbers
 
 from subprocess import Popen
 
@@ -197,11 +198,14 @@ class CsvAnywhere():
 
 
   def reformat_type(self,stuff):
-    if not stuff:
+    """stuff pode ser string, float, decimal, etc """
+    if not stuff and not(isinstance(stuff, numbers.Number)):
       stuff=""
     str_stuff=("%s" %stuff).encode('utf-8')
     if isfloat(str_stuff):
-      return str_stuff.replace('.',self.separador_decimal) 
+      if self.separador_decimal==',':
+         return str_stuff.replace(',','#').replace('.',',').replace('#','.')
+      return str_stuff
     else:
       return(str_stuff)  
 

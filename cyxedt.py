@@ -310,8 +310,8 @@ class MyNotebook(wx.Notebook):
         #self.out = OutputGrid(self)
         self.out = TestVirtualList(self,[], {})
         # redirect text here
-        sys.stdout=self.log
-        sys.stderr=self.log
+        #sys.stdout=self.log
+        #sys.stderr=self.log
 
 	# Setup
 	self.AddPage(self.edt, "Text Editor")
@@ -395,6 +395,8 @@ class MainFrame(wx.Frame):
          self.Bind(stc.EVT_STC_UPDATEUI, self.OnPosChanged)
 
          self.nbk.edt.EnableLineNumbers()
+
+         print 'After Line Numbers'
          if filename:
              self.LoadFromFile(filename)
          else:
@@ -516,17 +518,24 @@ def main(parser):
   parser.add_argument("filename",nargs='?',default='',help="arquivo do tipo CYX (consulta odbc e exportacao)")
   args = parser.parse_args()
 
+  print 'args'
   app = wx.App(False)
 
+  print 'app'
   win = MainFrame(args.filename)
+
+  print 'MainFrame'
   win.Show(True)
+  print 'Show'
   app.MainLoop()
+  print 'MainLoop'
   
     
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser()
   try:
+    print 'main'
     main(parser) 
   except:
     traceback.print_exc(file=sys.stdout)
