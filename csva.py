@@ -113,6 +113,8 @@ class CsvAnywhere():
   def config(self, attributes, key, default_value):
       return attributes[key] if (key in attributes.keys()) else default_value
   
+
+         
   def get_config(self):
       allowed_keys =[
                 "sql_query",
@@ -132,6 +134,11 @@ class CsvAnywhere():
       for key in new_config:
           self.__dict__[key]=new_config[key]
   
+  def le_config_teclado(self):
+     for key in self.get_config():
+        sys.stdout.write("Entre com %s (atual=%s):" %(key, self.__dict__[key]))
+        self.__dict__[key]=stdin.readline().rstrip("\n")
+
   def read_config(self,filename):
 
     # Read YAML file
@@ -373,6 +380,7 @@ def main(parser):
   parser.add_argument("-e","--edit",action="store_true",
                       help="Usa o editor indicado na variavel de ambiente 'CYX_EDITOR'"\
                            " para abrir o sql")
+  parser.add_argument("-n","--new",action="store_true",help="Cria uma query em branco")
   parser.add_argument("-r","--run",action="store_true",help="Roda a query")
   parser.add_argument("-c","--convert",action="store_true",help="Converte um arquivo xqkt em cyx")
   parser.add_argument("-t","--tabularize",action="store_true",help="Formata os dados em tabela e printa na tela")
@@ -384,7 +392,18 @@ def main(parser):
                      )
   parser.add_argument("-p","--parameters",nargs='+',help="Fornece parametros na linha de comando (caso contrario o programa espera a entrada)")
   args = parser.parse_args()
-  cyx=CsvAnywhere(args.filename)
+  if args.new:
+    cyx=CsvAnywhere('')
+    #sem_ext=('.').join(args.filename.split('.')[:-1])
+    #cyx.exportar=sem_ext+".csv"
+    #cyx.pos_exec='cat '+cyx.exportar
+    cyx.le_config_teclado()
+    cyx.write_config(args.filename)
+    print "Criado arquivo %s" % (args.filename)
+    return
+  else:
+    cyx=CsvAnywhere(args.filename)
+    
   if args.edit:
     edit_it(cyx)
   elif args.run:
