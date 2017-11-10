@@ -45,9 +45,6 @@ def exec_and_let_die(cmd_str):
              stdin=None, stdout=None, stderr=None, close_fds=True)
 
 
-def usage():
-  print __doc__
-
 def str2bool(v):
   return v.lower() in ("yes","true","t","1")
 
@@ -282,6 +279,22 @@ class CsvAnywhere():
       rows.append(row) 
     return rows
     
+  def htmlize_it(self,rows):
+    """"Convert the data to html table """
+    html="<table>" #this is a html table
+    html+="<tr>" #header
+    for column in self.columns:
+       html+="<th>%s</th> "%(column)
+    html+="</tr>\n" # header end
+    for row in rows:
+      html+="<tr>" 
+      for field in row:
+        html+="<td>%s</td>" %(field)
+      html+="</tr>\n"
+
+    html+="</table>" #table end
+    return html  
+
   def tabularize_it(self, rows):
 
     max_sizes=[]
@@ -334,8 +347,8 @@ def edit_it(cyx):
   f_edit.close()
 
 
-def run_it(cyx, param_values, tabularize, temp_export):
-
+def run_it(cyx, param_values, output_format, temp_export):
+  """ TODO  exportar para txt ou html """
   cyx.param_values=param_values
 
   cyx.connect_db()
@@ -345,7 +358,11 @@ def run_it(cyx, param_values, tabularize, temp_export):
     print "A consulta nao retornou valores"
     return
 
-  if tabularize:
+  if output_format=="html":
+    print cyx.htmlize_it(rows)
+    return
+
+  if output_format=="txt":
     for linha in cyx.tabularize_it(rows):
       print linha
     return
@@ -367,7 +384,6 @@ def run_it(cyx, param_values, tabularize, temp_export):
     open(cyx.exportar+".OK","a").close()
   else:
     print "Executando :{}".format(cyx.pos_exec)
-    #os.system(cyx.pos_exec)
     exec_and_let_die(cyx.pos_exec)
 
 
@@ -383,7 +399,8 @@ def main(parser):
   parser.add_argument("-n","--new",action="store_true",help="Cria uma query em branco")
   parser.add_argument("-r","--run",action="store_true",help="Roda a query")
   parser.add_argument("-c","--convert",action="store_true",help="Converte um arquivo xqkt em cyx")
-  parser.add_argument("-t","--tabularize",action="store_true",help="Formata os dados em tabela e printa na tela")
+  parser.add_argument("-f","--format",choices=["html","txt","csv"], default="csv",help="Formato do output (html,txt) o defaut é csv")
+
   parser.add_argument("-T","--temp",nargs=1,
                       help="Exporta dados para o arquivo FILENAME informado."\
                            "Ao final gera um arquivo FILENAME.ok."\
@@ -394,9 +411,6 @@ def main(parser):
   args = parser.parse_args()
   if args.new:
     cyx=CsvAnywhere('')
-    #sem_ext=('.').join(args.filename.split('.')[:-1])
-    #cyx.exportar=sem_ext+".csv"
-    #cyx.pos_exec='cat '+cyx.exportar
     cyx.le_config_teclado()
     cyx.write_config(args.filename)
     print "Criado arquivo %s" % (args.filename)
@@ -407,7 +421,7 @@ def main(parser):
   if args.edit:
     edit_it(cyx)
   elif args.run:
-    run_it(cyx,args.parameters, args.tabularize, args.temp)
+    run_it(cyx,args.parameters, args.format, args.temp)
   elif args.convert:
     print "Converted" #Done when object is created
   else:
