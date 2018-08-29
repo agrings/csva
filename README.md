@@ -2,10 +2,18 @@
 Chupeta
 -------
 
-Odbc to Csv extractor
+Odbc to Csv/txt/html extractor
 
-Install
--------
+Install (Ubuntu)
+----------------
+
+You will need:
+* wxpython
+* pyodbc 
+* pyaml
+
+File association
+----------------
 
 sudo cp chupeta.desktop /usr/share/applications/
 
