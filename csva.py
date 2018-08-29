@@ -229,7 +229,7 @@ class CsvAnywhere():
     i = 0
     linha=''
     for item in list:
-      linha+="%s"%(self.reformat_type(item))
+      linha+=("%s"%(self.reformat_type(item))).encode('utf-8')
       i+=1
  
       if i < size:

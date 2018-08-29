@@ -10,6 +10,7 @@ import wx.lib.newevent
 import wx.lib.agw.aquabutton as AB
 import wx.lib.agw.gradientbutton as GB
 import wx.lib.mixins.listctrl as listmix
+import collections #Para OrderedDict
 
 
 ChangedEvent, EVT_CHANGED = wx.lib.newevent.NewCommandEvent()
@@ -206,7 +207,7 @@ class ReadParamDialog(wx.Dialog):
             child.Destroy()
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.textCtrls={}
+        self.textCtrls=collections.OrderedDict()
 
         for key in param_dict.keys():
             label = wx.StaticText(self, wx.ID_ANY, key)
@@ -346,7 +347,11 @@ class TopPanel(wx.Panel):
 ID_READ_ONLY = wx.NewId()
 
 class MainFrame(wx.Frame):
-     
+    def writeLog(self, mensagem):
+        self.nbk.log.AppendText(mensagem+"\n");
+        #Manda tambem para stdout
+        print mensagem
+        
     def __init__(self, filename=''):
 	 wx.Frame.__init__(self, None, -1, 'CyxEditor 1.0')
  
@@ -396,7 +401,7 @@ class MainFrame(wx.Frame):
 
          self.nbk.edt.EnableLineNumbers()
 
-         print 'After Line Numbers'
+         #print 'After Line Numbers'
          if filename:
              self.LoadFromFile(filename)
          else:
@@ -414,9 +419,12 @@ class MainFrame(wx.Frame):
 
     def OnButton(self, event):
         if self.cyx.param_names :
-          params = { k:'' for k in self.cyx.param_names }
-          print "Lendo parametros.."
-          print params
+          params = collections.OrderedDict()
+          for k in self.cyx.param_names:
+              params[k]=''
+              #print k
+          self.writeLog("Lendo parametros");
+          #print params
           dlg = ReadParamDialog(params)
           res=dlg.ShowModal()
           self.cyx.param_values=[]
@@ -438,16 +446,17 @@ class MainFrame(wx.Frame):
             new_sql=self.nbk.edt.GetSelectedText()
 
           self.cyx.sql_query=new_sql
-          print "Conectando ao banco..."
+          
+          self.writeLog("Conectando ao banco...")
           self.cyx.connect_db()
-          print "Executando query..."
+          self.writeLog("Executando query...")
           rows=self.cyx.execute_query()
           
-          print "Preenchendo grid..."
+          self.writeLog("Preenchendo grid...")
           self.nbk.out.AddHeader(self.cyx.columns)
           self.nbk.out.AddRows(rows)
         except:
-            traceback.print_exc(file=sys.stdout)
+            self.writeLog("ERRO:\n "+traceback.format_exc())
           
         finally:
           btn.Enabled=True
@@ -518,26 +527,26 @@ def main(parser):
   parser.add_argument("filename",nargs='?',default='',help="arquivo do tipo CYX (consulta odbc e exportacao)")
   args = parser.parse_args()
 
-  print 'args'
+  #print 'args'
   app = wx.App(False)
-
-  print 'app'
+  #print 'app'
   win = MainFrame(args.filename)
-
-  print 'MainFrame'
+  #print 'MainFrame'
   win.Show(True)
-  print 'Show'
+  #print 'Show'
   app.MainLoop()
-  print 'MainLoop'
+  #print 'MainLoop'
   
     
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser()
   try:
-    print 'main'
+    #print 'main'
     main(parser) 
   except:
+    mensagem="ERRO:\n "+traceback.format_exc()
+    wx.MessageBox(mensagem,caption='Erro', style=wx.OK| wx.ICON_INFORMATION)
     traceback.print_exc(file=sys.stdout)
     print "Pressione qualquer tecla para continuar..."
     stdin.readline().rstrip("\n") 
