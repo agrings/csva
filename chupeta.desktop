@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Chupeta
+Comment=ODBC to CSV extractor
+Exec=/home/alexandre/bin/cyxedt %U
+Icon=/usr/share/pixmaps/python2.7.xpm
+Terminal=true
+Type=Application
+Categories=Development;
+StartupNotify=true
+NoDisplay=true
+MimeType=application/cyx;
+
