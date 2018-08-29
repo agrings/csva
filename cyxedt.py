@@ -128,9 +128,7 @@ class TestVirtualList(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Colum
         num_cols=self.GetColumnCount()
         listmix.ColumnSorterMixin.__init__(self, num_cols)
         self.SetItemCount(len(value_matrix))
-        i=0
-        for row in value_matrix:
-            self.Append(tuple(row))
+        
         for col in range(num_cols):
             self.SetColumnWidth(col, wx.LIST_AUTOSIZE)
 
