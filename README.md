@@ -16,6 +16,12 @@ You will need:
 File association
 ----------------
 
+Put the applicaton path in the ~/.profile
+
+Edit the file chupeta.desktop changing the "Exec=" line to inclute the path where the application is installed
+
+Associate the mime file to the application
+
 ```
 sudo cp chupeta.desktop /usr/share/applications/
 
@@ -35,9 +41,16 @@ sudo update-mime-database /usr/share/mime
 Install the Odbc driver
 -----------------------
 
+Sqllite
+
+```
+sudo apt-get install libsqliteodbc
+
+```
+
 Postgresql: 
 ```
-   apt-get install odbc-postgresql
+sudo apt-get install odbc-postgresql
 ```
 
 
