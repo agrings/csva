@@ -41,14 +41,15 @@ sudo update-mime-database /usr/share/mime
 Install the Odbc driver
 -----------------------
 
-Sqllite
+Sqlite:
 
 ```
 sudo apt-get install libsqliteodbc
 
 ```
 
-Postgresql: 
+Postgresql:
+
 ```
 sudo apt-get install odbc-postgresql
 ```
@@ -76,4 +77,6 @@ Username	= postgres
 Password	= blablublapombo
 Port		= 5432
 ```
+
+See the files in testdb/ for a complete example of configuration to Sqlite databases
 
