@@ -1,0 +1,13 @@
+caracter_separacao: !!python/unicode ';'
+descricao: 'Esse é um pequeno exemplo de um arquivo de consulta do tipo cyx.
+
+  A função principal desse tipo de consulta é gerar um arquivo csv
+
+  '
+exportar: !!python/unicode 'teste.csv'
+exportar_nomes_campos: !!python/unicode 'True'
+pos_exec: !!python/unicode 'vim teste.csv'
+resumo: !!python/unicode 'Consulta teste sqlite'
+separador_decimal: !!python/unicode ','
+sql_query: "select * \nfrom employees\nwhere title like \"Sale%\"\n"
+string_conexao_pyodbc: !!python/unicode 'DSN=chinook'
