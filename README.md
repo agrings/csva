@@ -41,3 +41,15 @@ Mysql:
    * Follow the instructions in: https://dev.mysql.com/doc/connector-odbc/en/connector-odbc-installation-binary-unix-tarball.html
    
    
+Configure the DSN:
+
+Edit the file /etc/odbc.ini
+
+[DevDb]
+Description	= Postgresql connecton to Development database
+Driver		= PostgreSQL Unicode
+Database	= devdb
+Servername	= 192.168.0.300
+Username	= postgres
+Password	= blablublapombo
+Port		= 5432
